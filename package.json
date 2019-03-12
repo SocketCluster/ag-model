@@ -1,10 +1,10 @@
 {
-  "name": "sc-model",
+  "name": "ag-model",
   "version": "1.1.6",
-  "description": "SocketCluster model component for the front end",
-  "main": "sc-model.js",
+  "description": "Asyngular model component for the front end",
+  "main": "ag-model.js",
   "dependencies": {
-    "sc-component-emitter": "^1.2.1",
+    "async-stream-emitter": "^3.0.2",
     "sc-json-stable-stringify": "^2.0.0"
   },
   "devDependencies": {},
@@ -13,17 +13,17 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/SocketCluster/sc-model.git"
+    "url": "git://github.com/SocketCluster/ag-model.git"
   },
   "keywords": [
-    "socketcluster",
+    "asyngular",
     "realtime",
     "model"
   ],
   "author": "Jonathan Gros-Dubois",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/SocketCluster/sc-model/issues"
+    "url": "https://github.com/SocketCluster/ag-model/issues"
   },
-  "homepage": "https://github.com/SocketCluster/sc-model#readme"
+  "homepage": "https://github.com/SocketCluster/ag-model#readme"
 }
