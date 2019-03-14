@@ -10,13 +10,16 @@ function AGField(options) {
   this.name = options.name;
   this.active = true;
 
-  this.resourceChannelName = 'crud>' + this.resourceType + '/' + this.resourceId + '/' + this.name;
-  this._symbol = Symbol(this.resourceChannelName);
+  this.resourceChannelName = `crud>${this.resourceType}/${this.resourceId}/${this.name}`;
+  this._symbol = Symbol();
 
   if (!this.socket.channelWatchers) {
     this.socket.channelWatchers = {};
   }
-  this.socket.channelWatchers[this._symbol] = true;
+  if (!this.socket.channelWatchers[this.resourceChannelName]) {
+    this.socket.channelWatchers[this.resourceChannelName] = {};
+  }
+  this.socket.channelWatchers[this.resourceChannelName][this._symbol] = true;
 
   this.channel = this.socket.subscribe(this.resourceChannelName);
 
@@ -39,6 +42,7 @@ function AGField(options) {
     }
   })();
 
+  // TODO 2: Always rebind while instance is active?
   (async () => {
     for await (let event of this.channel.listener('subscribe')) {
       // Fetch data when the subscribe is successful.
@@ -145,8 +149,13 @@ AGField.prototype.destroy = function () {
   this.active = false;
   this.socket.killListener('authenticate');
   this.channel.kill();
-  delete this.socket.channelWatchers[this._symbol];
-  if (!Object.getOwnPropertySymbols(this.socket.channelWatchers).length) {
+
+  let watchers = this.socket.channelWatchers[this.resourceChannelName];
+  if (watchers) {
+    delete watchers[this._symbol];
+  }
+  if (!Object.getOwnPropertySymbols(watchers || {}).length) {
+    delete this.socket.channelWatchers[this.resourceChannelName];
     this.channel.unsubscribe();
   }
 };
