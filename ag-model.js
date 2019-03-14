@@ -16,6 +16,7 @@ function AGModel(options) {
   this.value = {
     id: this.id
   };
+  this.active = true;
 
   this.fields.forEach((field) => {
     let agField = new AGField({
@@ -89,6 +90,7 @@ AGModel.prototype.delete = async function (field) {
 };
 
 AGModel.prototype.destroy = function () {
+  this.active = false;
   Object.values(this.agFields).forEach((agField) => {
     agField.killListener('error');
     agField.killListener('change');

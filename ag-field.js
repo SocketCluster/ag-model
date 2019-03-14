@@ -23,17 +23,29 @@ function AGField(options) {
 
   this.channel = this.socket.subscribe(this.resourceChannelName);
 
+  this._channelOutputConsumerIds = [];
+  this._channelListenerConsumerIds = [];
+  this._socketConsumerIds = [];
+
   (async () => {
-    while (this.active) {
-      for await (let packet of this.channel) {
-        if (packet == null) {
+    let consumer = this.channel.createConsumer();
+    this._channelOutputConsumerIds.push(consumer.id);
+    while (true) {
+      let packet = await consumer.next();
+      if (packet.done) {
+        if (!this.active) {
+          break;
+        }
+      } else {
+        let payload = packet.value;
+        if (payload == null) {
           this.loadData();
         } else {
           let oldValue = this.value;
-          if (packet.type === 'delete') {
+          if (payload.type === 'delete') {
             this.value = null;
           } else {
-            this.value = packet.value;
+            this.value = payload.value;
           }
           this.loadedValue = this.value;
           this._triggerValueChange(oldValue, this.value);
@@ -42,17 +54,34 @@ function AGField(options) {
     }
   })();
 
-  // TODO 2: Always rebind while instance is active?
   (async () => {
-    for await (let event of this.channel.listener('subscribe')) {
-      // Fetch data when the subscribe is successful.
-      this.loadData();
+    let consumer = this.channel.listener('subscribe').createConsumer();
+    this._channelListenerConsumerIds.push(consumer.id);
+    while (true) {
+      let packet = await consumer.next();
+      if (packet.done) {
+        if (!this.active) {
+          break;
+        }
+      } else {
+        // Fetch data when the subscribe is successful.
+        this.loadData();
+      }
     }
   })();
 
   (async () => {
-    for await (let {error} of this.channel.listener('subscribeFail')) {
-      this.emit('error', {error: this._formatError(error)});
+    let consumer = this.channel.listener('subscribeFail').createConsumer();
+    this._channelListenerConsumerIds.push(consumer.id);
+    while (true) {
+      let packet = await consumer.next();
+      if (packet.done) {
+        if (!this.active) {
+          break;
+        }
+      } else {
+        this.emit('error', {error: this._formatError(packet.value.error)});
+      }
     }
   })();
 
@@ -61,8 +90,15 @@ function AGField(options) {
   }
 
   (async () => {
-    while (this.active) {
-      for await (let event of this.socket.listener('authenticate')) {
+    let consumer = this.socket.listener('authenticate').createConsumer();
+    this._socketConsumerIds.push(consumer.id);
+    while (true) {
+      let packet = await consumer.next();
+      if (packet.done) {
+        if (!this.active) {
+          break;
+        }
+      } else {
         this.socket.subscribe(this.resourceChannelName);
       }
     }
@@ -147,8 +183,15 @@ AGField.prototype.destroy = function () {
     return;
   }
   this.active = false;
-  this.socket.killListener('authenticate');
-  this.channel.kill();
+  this._channelOutputConsumerIds.forEach((consumerId) => {
+    this.channel.killOutputConsumer(consumerId);
+  });
+  this._channelListenerConsumerIds.forEach((consumerId) => {
+    this.channel.killListenerConsumer(consumerId);
+  });
+  this._socketConsumerIds.forEach((consumerId) => {
+    this.socket.killListenerConsumer(consumerId);
+  });
 
   let watchers = this.socket.channelWatchers[this.resourceChannelName];
   if (watchers) {
