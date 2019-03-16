@@ -25,7 +25,7 @@ function AGField(options) {
 
   this._channelOutputConsumerIds = [];
   this._channelListenerConsumerIds = [];
-  this._socketConsumerIds = [];
+  this._socketListenerConsumerIds = [];
 
   (async () => {
     let consumer = this.channel.createConsumer();
@@ -91,7 +91,7 @@ function AGField(options) {
 
   (async () => {
     let consumer = this.socket.listener('authenticate').createConsumer();
-    this._socketConsumerIds.push(consumer.id);
+    this._socketListenerConsumerIds.push(consumer.id);
     while (true) {
       let packet = await consumer.next();
       if (packet.done) {
@@ -189,7 +189,7 @@ AGField.prototype.destroy = function () {
   this._channelListenerConsumerIds.forEach((consumerId) => {
     this.channel.killListenerConsumer(consumerId);
   });
-  this._socketConsumerIds.forEach((consumerId) => {
+  this._socketListenerConsumerIds.forEach((consumerId) => {
     this.socket.killListenerConsumer(consumerId);
   });
 
