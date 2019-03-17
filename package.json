@@ -4,7 +4,7 @@
   "description": "Asyngular model component for the front end",
   "main": "ag-model.js",
   "dependencies": {
-    "async-stream-emitter": "^3.0.2",
+    "async-stream-emitter": "^3.0.3",
     "sc-json-stable-stringify": "^2.0.0"
   },
   "devDependencies": {},
