@@ -1,6 +1,6 @@
 {
   "name": "ag-model",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Asyngular model component for the front end",
   "main": "ag-model.js",
   "dependencies": {
