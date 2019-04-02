@@ -17,7 +17,7 @@ import AGModel from '/node_modules/ag-model/ag-model.js';
 
 ## Usage
 
-See https://github.com/SocketCluster/ag-sample-inventory for sample app which demonstrates this component in action.
+See https://github.com/SocketCluster/ag-crud-sample for sample app which demonstrates this component in action.
 
 An AGModel object can be instantiated like this:
 
