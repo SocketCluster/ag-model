@@ -12,8 +12,10 @@ function AGModel(options) {
   this.type = options.type;
   this.id = options.id;
   this.fields = options.fields;
+  this.defaultFieldValues = options.defaultFieldValues;
   this.agFields = {};
   this.value = {
+    ...this.defaultFieldValues,
     id: this.id
   };
   this.active = true;
