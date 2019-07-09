@@ -39,7 +39,10 @@ function AGField(options) {
         }
       } else {
         let payload = packet.value;
-        if (payload == null || !this.passiveMode) {
+        if (
+          payload == null ||
+          (!this.passiveMode && payload.type !== 'delete')
+        ) {
           this.loadData();
         } else {
           let oldValue = this.value;
