@@ -9,6 +9,7 @@ function AGField(options) {
   this.resourceId = options.resourceId;
   this.name = options.name;
   this.active = true;
+  this.passiveMode = options.passiveMode;
 
   this.resourceChannelName = `crud>${this.resourceType}/${this.resourceId}/${this.name}`;
   this._symbol = Symbol();
@@ -38,7 +39,7 @@ function AGField(options) {
         }
       } else {
         let payload = packet.value;
-        if (payload == null) {
+        if (payload == null || !this.passiveMode) {
           this.loadData();
         } else {
           let oldValue = this.value;

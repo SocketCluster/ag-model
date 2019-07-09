@@ -19,13 +19,15 @@ function AGModel(options) {
     id: this.id
   };
   this.active = true;
+  this.passiveMode = options.passiveMode || false;
 
   this.fields.forEach((field) => {
     let agField = new AGField({
       socket: this.socket,
       resourceType: this.type,
       resourceId: this.id,
-      name: field
+      name: field,
+      passiveMode: this.passiveMode
     });
     this.agFields[field] = agField;
     this.value[field] = null;
