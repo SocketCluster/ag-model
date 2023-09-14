@@ -1,7 +1,7 @@
 import AGField from './ag-field.js';
 const AsyncStreamEmitter = AGField.AsyncStreamEmitter;
 
-// options.socket: The Asyngular client socket to use to sync the model state.
+// options.socket: The SocketCluster client socket to use to sync the model state.
 // options.type: The resource type.
 // options.id: The resource id.
 // options.fields: An array of fields names required by this model.

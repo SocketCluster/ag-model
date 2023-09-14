@@ -1,5 +1,5 @@
 # AGModel
-Asyngular real-time model component for reactive front ends.
+SocketCluster real-time model component for reactive front ends.
 Designed to work with `ag-crud-rethink` https://github.com/SocketCluster/ag-crud-rethink
 
 ## Setup
@@ -23,7 +23,7 @@ An AGModel object can be instantiated like this:
 
 ```js
 this.productModel = new AGModel({
-  // Pass the Asyngular client socket object.
+  // Pass the SocketCluster client socket object.
   socket: pageOptions.socket,
   type: 'Product',
   id: this.productId,
@@ -68,7 +68,7 @@ Then you can bind this data to your template like this:
 
 The AGModel tag supports the following attributes:
 
-- ```socket```: An ```asyngular-client``` socket; note that the same global socket object can be shared between multiple AGCollection and AGModel instances.
+- ```socket```: An ```socketcluster-client``` socket; note that the same global socket object can be shared between multiple AGCollection and AGModel instances.
 - ```type```: This is the model/table name in RethinkDB.
 - ```id```: The id of the resource/document which this model represents.
 - ```fields```: The document fields to load for this model.
