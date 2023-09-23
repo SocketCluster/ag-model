@@ -1,5 +1,5 @@
 import jsonStableStringify from '../sc-json-stable-stringify/sc-json-stable-stringify.js';
-import AsyncStreamEmitter from '../async-stream-emitter/async-stream-emitter.js';
+import AsyncStreamEmitter from '../async-stream-emitter/async-stream-emitter.min.js';
 
 function AGField(options) {
   AsyncStreamEmitter.call(this);
@@ -124,6 +124,7 @@ AGField.prototype._formatError = function (error) {
 };
 
 AGField.prototype._triggerValueChange = function (oldValue, newValue) {
+  if (oldValue === newValue) return;
   this.emit('change', {
     field: this.name,
     oldValue: oldValue,
