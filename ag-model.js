@@ -46,7 +46,8 @@ function AGModel(options) {
           resourceId: this.id,
           resourceField: event.field,
           oldValue: event.oldValue,
-          newValue: event.newValue
+          newValue: event.newValue,
+          isRemote: event.isRemote
         });
       }
     })();

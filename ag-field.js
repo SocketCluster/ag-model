@@ -52,7 +52,7 @@ function AGField(options) {
             this.value = payload.value;
           }
           this.loadedValue = this.value;
-          this._triggerValueChange(oldValue, this.value);
+          this._triggerValueChange(oldValue, this.value, true);
         }
       }
     }
@@ -123,12 +123,13 @@ AGField.prototype._formatError = function (error) {
   return error;
 };
 
-AGField.prototype._triggerValueChange = function (oldValue, newValue) {
+AGField.prototype._triggerValueChange = function (oldValue, newValue, isRemote) {
   if (oldValue === newValue) return;
   this.emit('change', {
     field: this.name,
     oldValue: oldValue,
-    newValue: newValue
+    newValue: newValue,
+    isRemote
   });
 };
 
@@ -148,7 +149,7 @@ AGField.prototype.loadData = async function () {
   let oldValue = this.value;
   this.value = result;
   this.loadedValue = result;
-  this._triggerValueChange(oldValue, this.value);
+  this._triggerValueChange(oldValue, this.value, true);
 };
 
 AGField.prototype.save = function () {
@@ -161,7 +162,7 @@ AGField.prototype.save = function () {
 AGField.prototype.update = async function (newValue) {
   let oldValue = this.value;
   this.value = newValue;
-  this._triggerValueChange(oldValue, this.value);
+  this._triggerValueChange(oldValue, this.value, false);
   let query = {
     type: this.resourceType,
     id: this.resourceId,
@@ -174,7 +175,7 @@ AGField.prototype.update = async function (newValue) {
 AGField.prototype.delete = function () {
   let oldValue = this.value;
   this.value = null;
-  this._triggerValueChange(oldValue, this.value);
+  this._triggerValueChange(oldValue, this.value, false);
   let query = {
     type: this.resourceType,
     id: this.resourceId,
