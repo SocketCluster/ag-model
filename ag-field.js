@@ -185,6 +185,7 @@ AGField.prototype.delete = function () {
 };
 
 AGField.prototype.destroy = function () {
+  this.killAllListeners();
   if (!this.active) {
     return;
   }

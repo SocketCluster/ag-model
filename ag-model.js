@@ -95,10 +95,9 @@ AGModel.prototype.delete = async function (field) {
 };
 
 AGModel.prototype.destroy = function () {
+  this.killAllListeners();
   this.active = false;
   Object.values(this.agFields).forEach((agField) => {
-    agField.killListener('error');
-    agField.killListener('change');
     agField.destroy();
   });
 };
