@@ -46,14 +46,19 @@ function AGModel(options) {
     })();
 
     (async () => {
-      for await (let event of agField.listener('change')) {
-        this.value[event.field] = event.newValue;
+      for await (let event of agField.listener('load')) {
         if (!this.isLoaded) {
           this.isLoaded = Object.values(this.agFields).every(field => field.isLoaded);
           if (this.isLoaded) {
             this.emit('load', {});
           }
         }
+      }
+    })();
+
+    (async () => {
+      for await (let event of agField.listener('change')) {
+        this.value[event.field] = event.newValue;
         this.emit('change', {
           resourceType: this.type,
           resourceId: this.id,
