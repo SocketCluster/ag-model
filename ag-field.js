@@ -9,6 +9,7 @@ function AGField(options) {
   this.resourceId = options.resourceId;
   this.name = options.name;
   this.active = true;
+  this.isLoaded = false;
   this.passiveMode = options.passiveMode;
 
   this.resourceChannelName = `crud>${this.resourceType}/${this.resourceId}/${this.name}`;
@@ -134,6 +135,8 @@ AGField.prototype._triggerValueChange = function (oldValue, newValue, isRemote) 
 };
 
 AGField.prototype.loadData = async function () {
+  this.isLoaded = false;
+
   let query = {
     type: this.resourceType,
     id: this.resourceId,
@@ -149,6 +152,10 @@ AGField.prototype.loadData = async function () {
   let oldValue = this.value;
   this.value = result;
   this.loadedValue = result;
+  if (!this.isLoaded) {
+    this.isLoaded = true;
+    this.emit('load', {});
+  }
   this._triggerValueChange(oldValue, this.value, true);
 };
 

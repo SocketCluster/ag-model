@@ -13,8 +13,7 @@ function AGModel(options) {
   this.id = options.id;
   this.fields = options.fields || [];
   this.defaultFieldValues = options.defaultFieldValues;
-  this.loadedFields = {};
-  this.isReady = false;
+  this.isLoaded = false;
   this.agFields = {};
   this.value = {
     ...this.defaultFieldValues,
@@ -43,11 +42,10 @@ function AGModel(options) {
     (async () => {
       for await (let event of agField.listener('change')) {
         this.value[event.field] = event.newValue;
-        if (!this.isReady) {
-          this.loadedFields[event.field] = true;
-          this.isReady = Object.keys(this.loadedFields).length >= this.fields.length;
-          if (this.isReady) {
-            this.emit('ready', {});
+        if (!this.isLoaded) {
+          this.isLoaded = Object.values(this.agFields).every(field => field.isLoaded);
+          if (this.isLoaded) {
+            this.emit('load', {});
           }
         }
         this.emit('change', {
