@@ -11,8 +11,10 @@ function AGModel(options) {
   this.socket = options.socket;
   this.type = options.type;
   this.id = options.id;
-  this.fields = options.fields;
+  this.fields = options.fields || [];
   this.defaultFieldValues = options.defaultFieldValues;
+  this.loadedFields = {};
+  this.isReady = false;
   this.agFields = {};
   this.value = {
     ...this.defaultFieldValues,
@@ -41,6 +43,13 @@ function AGModel(options) {
     (async () => {
       for await (let event of agField.listener('change')) {
         this.value[event.field] = event.newValue;
+        if (!this.isReady) {
+          this.loadedFields[event.field] = true;
+          this.isReady = Object.keys(this.loadedFields).length >= this.fields.length;
+          if (this.isReady) {
+            this.emit('ready', {});
+          }
+        }
         this.emit('change', {
           resourceType: this.type,
           resourceId: this.id,
