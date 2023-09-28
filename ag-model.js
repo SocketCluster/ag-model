@@ -40,6 +40,12 @@ function AGModel(options) {
     })();
 
     (async () => {
+      for await (let event of agField.listener('fetch')) {
+        this.isLoaded = false;
+      }
+    })();
+
+    (async () => {
       for await (let event of agField.listener('change')) {
         this.value[event.field] = event.newValue;
         if (!this.isLoaded) {

@@ -136,6 +136,7 @@ AGField.prototype._triggerValueChange = function (oldValue, newValue, isRemote) 
 
 AGField.prototype.loadData = async function () {
   this.isLoaded = false;
+  this.emit('fetch', {});
 
   let query = {
     type: this.resourceType,
