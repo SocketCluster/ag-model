@@ -59,6 +59,17 @@ function AGField(options) {
     }
   })();
 
+  // The purpose of useFastInitLoad is to reduce latency of the initial load
+  // when the field is first created.
+  let useFastInitLoad;
+
+  if (this.socket.state == 'open') {
+    this.loadData();
+    useFastInitLoad = true;
+  } else {
+    useFastInitLoad = false;
+  }
+
   (async () => {
     let consumer = this.channel.listener('subscribe').createConsumer();
     this._channelListenerConsumerIds.push(consumer.id);
@@ -69,8 +80,13 @@ function AGField(options) {
           break;
         }
       } else {
-        // Fetch data when the subscribe is successful.
-        this.loadData();
+        // Fetch data when subscribe is successful.
+        // If useFastInitLoad was used, then do not load again the first time.
+        if (useFastInitLoad) {
+          useFastInitLoad = false;
+        } else {
+          this.loadData();
+        }
       }
     }
   })();
@@ -85,14 +101,11 @@ function AGField(options) {
           break;
         }
       } else {
+        useFastInitLoad = false;
         this.emit('error', {error: this._formatError(packet.value.error)});
       }
     }
   })();
-
-  if (this.channel.state === 'subscribed') {
-    this.loadData();
-  }
 
   (async () => {
     let consumer = this.socket.listener('authenticate').createConsumer();
