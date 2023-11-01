@@ -13,6 +13,7 @@ function AGModel(options) {
   this.id = options.id;
   this.fields = options.fields || [];
   this.defaultFieldValues = options.defaultFieldValues;
+  this.enableRebound = options.enableRebound || false;
   this.isLoaded = false;
   this.agFields = {};
   this.value = {
@@ -22,13 +23,23 @@ function AGModel(options) {
   this.active = true;
   this.passiveMode = options.passiveMode || false;
 
+  if (this.enableRebound) {
+    if (!this.socket.lastPublisherId) {
+      this.socket.lastPublisherId = 1;
+    }
+    this.publisherId = String(this.socket.lastPublisherId++);
+  } else {
+    this.publisherId = null;
+  }
+
   this.fields.forEach((field) => {
     let agField = new AGField({
       socket: this.socket,
       resourceType: this.type,
       resourceId: this.id,
       name: field,
-      passiveMode: this.passiveMode
+      passiveMode: this.passiveMode,
+      publisherId: this.publisherId
     });
     this.agFields[field] = agField;
     this.value[field] = null;
@@ -87,8 +98,11 @@ AGModel.prototype.update = async function (field, newValue) {
     type: this.type,
     id: this.id,
     field: field,
-    value: newValue
+    value: newValue,
   };
+  if (this.publisherId) {
+    query.publisherId = this.publisherId;
+  }
   return this.socket.invoke('update', query);
 };
 
@@ -97,6 +111,9 @@ AGModel.prototype.delete = async function (field) {
     type: this.type,
     id: this.id
   };
+  if (this.publisherId) {
+    query.publisherId = this.publisherId;
+  }
   if (field != null) {
     if (this.agFields[field]) {
       return this.agFields[field].delete();

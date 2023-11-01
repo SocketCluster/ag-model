@@ -11,6 +11,7 @@ function AGField(options) {
   this.active = true;
   this.isLoaded = false;
   this.passiveMode = options.passiveMode;
+  this.publisherId = options.publisherId;
 
   this.resourceChannelName = `crud>${this.resourceType}/${this.resourceId}/${this.name}`;
   this._symbol = Symbol();
@@ -40,6 +41,7 @@ function AGField(options) {
         }
       } else {
         let payload = packet.value;
+        if (this.publisherId && payload && payload.publisherId === this.publisherId) continue;
         if (
           payload == null ||
           (!this.passiveMode && payload.type !== 'delete')
@@ -205,6 +207,9 @@ AGField.prototype.update = async function (newValue) {
     field: this.name,
     value: newValue
   };
+  if (this.publisherId) {
+    query.publisherId = this.publisherId;
+  }
   return this.socket.invoke('update', query);
 };
 
@@ -217,6 +222,9 @@ AGField.prototype.delete = function () {
     id: this.resourceId,
     field: this.name
   };
+  if (this.publisherId) {
+    query.publisherId = this.publisherId;
+  }
   return this.socket.invoke('delete', query);
 };
 
