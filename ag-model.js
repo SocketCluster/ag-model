@@ -95,6 +95,7 @@ AGModel.prototype.update = async function (field, newValue) {
     return this.agFields[field].update(newValue);
   }
   let query = {
+    action: 'update',
     type: this.type,
     id: this.id,
     field: field,
@@ -103,11 +104,12 @@ AGModel.prototype.update = async function (field, newValue) {
   if (this.publisherId) {
     query.publisherId = this.publisherId;
   }
-  return this.socket.invoke('update', query);
+  return this.socket.invoke('crud', query);
 };
 
 AGModel.prototype.delete = async function (field) {
   let query = {
+    action: 'delete',
     type: this.type,
     id: this.id
   };
@@ -120,7 +122,7 @@ AGModel.prototype.delete = async function (field) {
     }
     query.field = field;
   }
-  return this.socket.invoke('delete', query);
+  return this.socket.invoke('crud', query);
 };
 
 AGModel.prototype.destroy = function () {

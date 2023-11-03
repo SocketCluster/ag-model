@@ -166,6 +166,7 @@ AGField.prototype._triggerValueChange = function (oldValue, newValue, isRemote) 
 
 AGField.prototype.loadData = async function () {
   let query = {
+    action: 'read',
     type: this.resourceType,
     id: this.resourceId,
     field: this.name
@@ -173,7 +174,7 @@ AGField.prototype.loadData = async function () {
 
   let result;
   try {
-    result = await this.socket.invoke('read', query);
+    result = await this.socket.invoke('crud', query);
   } catch (error) {
     this.emit('error', {error: this._formatError(error)});
   }
@@ -202,6 +203,7 @@ AGField.prototype.update = async function (newValue) {
   this.value = newValue;
   this._triggerValueChange(oldValue, this.value, false);
   let query = {
+    action: 'update',
     type: this.resourceType,
     id: this.resourceId,
     field: this.name,
@@ -210,7 +212,7 @@ AGField.prototype.update = async function (newValue) {
   if (this.publisherId) {
     query.publisherId = this.publisherId;
   }
-  return this.socket.invoke('update', query);
+  return this.socket.invoke('crud', query);
 };
 
 AGField.prototype.delete = function () {
@@ -218,6 +220,7 @@ AGField.prototype.delete = function () {
   this.value = null;
   this._triggerValueChange(oldValue, this.value, false);
   let query = {
+    action: 'delete',
     type: this.resourceType,
     id: this.resourceId,
     field: this.name
@@ -225,7 +228,7 @@ AGField.prototype.delete = function () {
   if (this.publisherId) {
     query.publisherId = this.publisherId;
   }
-  return this.socket.invoke('delete', query);
+  return this.socket.invoke('crud', query);
 };
 
 AGField.prototype.destroy = function () {
