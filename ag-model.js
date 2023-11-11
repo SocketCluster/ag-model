@@ -33,53 +33,61 @@ function AGModel(options) {
   }
 
   this.fields.forEach((field) => {
-    let agField = new AGField({
-      socket: this.socket,
-      resourceType: this.type,
-      resourceId: this.id,
-      name: field,
-      passiveMode: this.passiveMode,
-      publisherId: this.publisherId
-    });
-    this.agFields[field] = agField;
-    this.value[field] = null;
-
-    (async () => {
-      for await (let event of agField.listener('error')) {
-        this.emit('error', event);
-      }
-    })();
-
-    (async () => {
-      for await (let event of agField.listener('load')) {
-        if (!this.isLoaded) {
-          this.isLoaded = Object.values(this.agFields).every(field => field.isLoaded);
-          if (this.isLoaded) {
-            this.emit('load', {});
-          }
-        }
-      }
-    })();
-
-    (async () => {
-      for await (let event of agField.listener('change')) {
-        this.value[event.field] = event.newValue;
-        this.emit('change', {
-          resourceType: this.type,
-          resourceId: this.id,
-          resourceField: event.field,
-          oldValue: event.oldValue,
-          newValue: event.newValue,
-          isRemote: event.isRemote
-        });
-      }
-    })();
+    let agField = this.addField(field);
   });
 }
 
 AGModel.prototype = Object.create(AsyncStreamEmitter.prototype);
 
 AGModel.AsyncStreamEmitter = AsyncStreamEmitter;
+
+AGModel.prototype.addField = function (field) {
+  if (!this.active || this.agFields[field]) return;
+
+  let agField = new AGField({
+    socket: this.socket,
+    resourceType: this.type,
+    resourceId: this.id,
+    name: field,
+    passiveMode: this.passiveMode,
+    publisherId: this.publisherId
+  });
+  this.agFields[field] = agField;
+  this.value[field] = null;
+
+  (async () => {
+    for await (let event of agField.listener('error')) {
+      this.emit('error', event);
+    }
+  })();
+
+  (async () => {
+    for await (let event of agField.listener('change')) {
+      this.value[event.field] = event.newValue;
+      this.emit('change', {
+        resourceType: this.type,
+        resourceId: this.id,
+        resourceField: event.field,
+        oldValue: event.oldValue,
+        newValue: event.newValue,
+        isRemote: event.isRemote
+      });
+    }
+  })();
+
+  (async () => {
+    for await (let event of agField.listener('load')) {
+      if (!this.isLoaded) {
+        this.isLoaded = Object.values(this.agFields).every(field => field.isLoaded);
+        if (this.isLoaded) {
+          this.emit('load', {});
+        }
+      }
+    }
+  })();
+
+  return agField;
+};
 
 AGModel.prototype.save = function () {
   let promises = [];
