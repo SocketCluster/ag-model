@@ -10,7 +10,8 @@ function AGField(options) {
   this.name = options.name;
   this.active = true;
   this.isLoaded = false;
-  this.isFresh = false;
+  this.isUpdating = false;
+  this.isDeleting = false;
   this.passiveMode = options.passiveMode;
   this.publisherId = options.publisherId;
 
@@ -166,7 +167,6 @@ AGField.prototype._triggerValueChange = function (oldValue, newValue, isRemote) 
 };
 
 AGField.prototype.loadData = async function () {
-  this.isFresh = false;
   let query = {
     action: 'read',
     type: this.resourceType,
@@ -181,7 +181,7 @@ AGField.prototype.loadData = async function () {
     this.emit('error', {error: this._formatError(error)});
   }
 
-  if (this.isFresh) {
+  if (this.isUpdating || this.isDeleting) {
     if (!this.isLoaded) {
       this.isLoaded = true;
       this.emit('load', {});
@@ -211,6 +211,7 @@ AGField.prototype.save = async function () {
 AGField.prototype.update = async function (newValue) {
   let oldValue = this.value;
   this.value = newValue;
+  this.isUpdating = true;
   this._triggerValueChange(oldValue, this.value, false);
   let query = {
     action: 'update',
@@ -222,13 +223,19 @@ AGField.prototype.update = async function (newValue) {
   if (this.publisherId) {
     query.publisherId = this.publisherId;
   }
-  this.isFresh = true;
-  return this.socket.invoke('crud', query);
+  try {
+    await this.socket.invoke('crud', query);
+  } catch (error) {
+    this.isUpdating = false;
+    throw error;
+  }
+  this.isUpdating = false;
 };
 
 AGField.prototype.delete = async function () {
   let oldValue = this.value;
   this.value = null;
+  this.isDeleting = true;
   this._triggerValueChange(oldValue, this.value, false);
   let query = {
     action: 'delete',
@@ -239,8 +246,13 @@ AGField.prototype.delete = async function () {
   if (this.publisherId) {
     query.publisherId = this.publisherId;
   }
-  this.isFresh = true;
-  return this.socket.invoke('crud', query);
+  try {
+    await this.socket.invoke('crud', query);
+  } catch (error) {
+    this.isDeleting = false;
+    throw error;
+  }
+  this.isDeleting = false;
 };
 
 AGField.prototype.destroy = function () {
