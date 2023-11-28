@@ -89,7 +89,7 @@ AGModel.prototype.addField = function (field) {
   return agField;
 };
 
-AGModel.prototype.save = function () {
+AGModel.prototype.save = async function () {
   let promises = [];
   Object.values(this.agFields).forEach((agField) => {
     agField.value = this.value[agField.name];

@@ -10,6 +10,7 @@ function AGField(options) {
   this.name = options.name;
   this.active = true;
   this.isLoaded = false;
+  this.isFresh = false;
   this.passiveMode = options.passiveMode;
   this.publisherId = options.publisherId;
 
@@ -165,6 +166,7 @@ AGField.prototype._triggerValueChange = function (oldValue, newValue, isRemote) 
 };
 
 AGField.prototype.loadData = async function () {
+  this.isFresh = false;
   let query = {
     action: 'read',
     type: this.resourceType,
@@ -179,6 +181,14 @@ AGField.prototype.loadData = async function () {
     this.emit('error', {error: this._formatError(error)});
   }
 
+  if (this.isFresh) {
+    if (!this.isLoaded) {
+      this.isLoaded = true;
+      this.emit('load', {});
+    }
+    return;
+  }
+
   let oldValue = this.value;
   this.value = result;
   this.loadedValue = result;
@@ -191,7 +201,7 @@ AGField.prototype.loadData = async function () {
   this._triggerValueChange(oldValue, this.value, true);
 };
 
-AGField.prototype.save = function () {
+AGField.prototype.save = async function () {
   if (this.value === this.loadedValue) {
     return Promise.resolve(this.value);
   }
@@ -212,10 +222,11 @@ AGField.prototype.update = async function (newValue) {
   if (this.publisherId) {
     query.publisherId = this.publisherId;
   }
+  this.isFresh = true;
   return this.socket.invoke('crud', query);
 };
 
-AGField.prototype.delete = function () {
+AGField.prototype.delete = async function () {
   let oldValue = this.value;
   this.value = null;
   this._triggerValueChange(oldValue, this.value, false);
@@ -228,6 +239,7 @@ AGField.prototype.delete = function () {
   if (this.publisherId) {
     query.publisherId = this.publisherId;
   }
+  this.isFresh = true;
   return this.socket.invoke('crud', query);
 };
 
