@@ -8,7 +8,7 @@ function AGField(options) {
   this.resourceType = options.resourceType;
   this.resourceId = options.resourceId;
   this.name = options.name;
-  this.active = true;
+  this.active = true;// TODO 00 rename active to isActive everywhere.
   this.isLoaded = false;
   this.isUpdating = false;
   this.isDeleting = false;
