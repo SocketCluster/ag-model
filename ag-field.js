@@ -8,7 +8,7 @@ function AGField(options) {
   this.resourceType = options.resourceType;
   this.resourceId = options.resourceId;
   this.name = options.name;
-  this.active = true;
+  this.isActive = true;
   this.isLoaded = false;
   this.isUpdating = false;
   this.isDeleting = false;
@@ -38,7 +38,7 @@ function AGField(options) {
     while (true) {
       let packet = await consumer.next();
       if (packet.done) {
-        if (!this.active) {
+        if (!this.isActive) {
           break;
         }
       } else {
@@ -80,7 +80,7 @@ function AGField(options) {
     while (true) {
       let packet = await consumer.next();
       if (packet.done) {
-        if (!this.active) {
+        if (!this.isActive) {
           break;
         }
       } else {
@@ -101,7 +101,7 @@ function AGField(options) {
     while (true) {
       let packet = await consumer.next();
       if (packet.done) {
-        if (!this.active) {
+        if (!this.isActive) {
           break;
         }
       } else {
@@ -117,7 +117,7 @@ function AGField(options) {
     while (true) {
       let packet = await consumer.next();
       if (packet.done) {
-        if (!this.active) {
+        if (!this.isActive) {
           break;
         }
       } else {
@@ -132,7 +132,7 @@ function AGField(options) {
     while (true) {
       let packet = await consumer.next();
       if (packet.done) {
-        if (!this.active) {
+        if (!this.isActive) {
           break;
         }
       } else {
@@ -257,10 +257,10 @@ AGField.prototype.delete = async function () {
 
 AGField.prototype.destroy = function () {
   this.killAllListeners();
-  if (!this.active) {
+  if (!this.isActive) {
     return;
   }
-  this.active = false;
+  this.isActive = false;
   this._channelOutputConsumerIds.forEach((consumerId) => {
     this.channel.killOutputConsumer(consumerId);
   });

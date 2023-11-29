@@ -14,14 +14,21 @@ function AGModel(options) {
   this.fields = options.fields || [];
   this.defaultFieldValues = options.defaultFieldValues;
   this.enableRebound = options.enableRebound || false;
-  this.isLoaded = false;
   this.agFields = {};
   this.value = {
     ...this.defaultFieldValues,
     id: this.id
   };
-  this.active = true;
+  this.isActive = true;
   this.passiveMode = options.passiveMode || false;
+  this._symbol = Symbol();
+
+  if (!this.socket.agFields) {
+    this.socket.agFields = {};
+  }
+  if (!this.socket.fieldWatchers) {
+    this.socket.fieldWatchers = {};
+  }
 
   if (this.enableRebound) {
     if (!this.socket.lastPublisherId) {
@@ -32,28 +39,46 @@ function AGModel(options) {
     this.publisherId = null;
   }
 
-  this.fields.forEach((field) => {
-    let agField = this.addField(field);
-  });
+  this.fields.forEach(field => this.addField(field));
+
+  this.isLoaded = Object.values(this.agFields).every(field => field.isLoaded);
 }
 
 AGModel.prototype = Object.create(AsyncStreamEmitter.prototype);
 
 AGModel.AsyncStreamEmitter = AsyncStreamEmitter;
 
-AGModel.prototype.addField = function (field) {
-  if (!this.active || this.agFields[field]) return;
+AGModel.prototype.getResourceId = function (field) {
+  return `${this.type}/${this.id}/${field}`;
+};
 
-  let agField = new AGField({
-    socket: this.socket,
-    resourceType: this.type,
-    resourceId: this.id,
-    name: field,
-    passiveMode: this.passiveMode,
-    publisherId: this.publisherId
-  });
+AGModel.prototype.addField = function (field) {
+  if (!this.isActive || this.agFields[field]) return;
+
+  let resourceId = this.getResourceId(field);
+  let agField;
+
+  if (this.socket.agFields[resourceId] && this.socket.agFields[resourceId].isActive) {
+    agField = this.socket.agFields[resourceId];
+  } else {
+    agField = new AGField({
+      socket: this.socket,
+      resourceType: this.type,
+      resourceId: this.id,
+      name: field,
+      passiveMode: this.passiveMode,
+      publisherId: this.publisherId
+    });
+    this.socket.agFields[resourceId] = agField;
+  }
+
+  if (!this.socket.fieldWatchers[resourceId]) {
+    this.socket.fieldWatchers[resourceId] = {};
+  }
+  this.socket.fieldWatchers[resourceId][this._symbol] = true;
+
   this.agFields[field] = agField;
-  this.value[field] = null;
+  this.value[field] = agField.value == null ? null : agField.value;
 
   (async () => {
     for await (let event of agField.listener('error')) {
@@ -135,9 +160,18 @@ AGModel.prototype.delete = async function (field) {
 
 AGModel.prototype.destroy = function () {
   this.killAllListeners();
-  this.active = false;
+  this.isActive = false;
   Object.values(this.agFields).forEach((agField) => {
-    agField.destroy();
+    let resourceId = this.getResourceId(agField.name);
+    let watchers = this.socket.fieldWatchers[resourceId];
+    if (watchers) {
+      delete watchers[this._symbol];
+    }
+    if (!Object.getOwnPropertySymbols(watchers || {}).length) {
+      delete this.socket.fieldWatchers[resourceId];
+      delete this.socket.agFields[resourceId];
+      agField.destroy();
+    }
   });
 };
 
