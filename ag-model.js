@@ -158,9 +158,12 @@ AGModel.prototype.delete = async function (field) {
   return this.socket.invoke('crud', query);
 };
 
-AGModel.prototype.destroy = function () {
+AGModel.prototype.destroy = async function () {
   this.killAllListeners();
   this.isActive = false;
+
+  await new Promise(resolve => setTimeout(resolve, 0));
+
   Object.values(this.agFields).forEach((agField) => {
     let resourceId = this.getResourceId(agField.name);
     let watchers = this.socket.fieldWatchers[resourceId];
