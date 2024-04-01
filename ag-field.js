@@ -8,6 +8,7 @@ function AGField(options) {
   this.resourceType = options.resourceType;
   this.resourceId = options.resourceId;
   this.name = options.name;
+  this.transformations = options.transformations || {};
   this.isActive = true;
   this.isLoaded = false;
   this.isUpdating = false;
@@ -173,6 +174,9 @@ AGField.prototype.loadData = async function () {
     id: this.resourceId,
     field: this.name
   };
+  if (this.transformations.sliceTo != null) {
+    query.sliceTo = this.transformations.sliceTo;
+  }
 
   let result;
   try {

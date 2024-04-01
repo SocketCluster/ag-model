@@ -12,6 +12,7 @@ function AGModel(options) {
   this.type = options.type;
   this.id = options.id;
   this.fields = options.fields || [];
+  this.fieldTransformations = options.fieldTransformations || {};
   this.defaultFieldValues = options.defaultFieldValues;
   this.enableRebound = options.enableRebound || false;
   this.agFields = {};
@@ -61,11 +62,13 @@ AGModel.prototype.addField = function (field) {
   if (this.socket.agFields[resourceId] && this.socket.agFields[resourceId].isActive) {
     agField = this.socket.agFields[resourceId];
   } else {
+    let transformations = this.fieldTransformations[field] || {};
     agField = new AGField({
       socket: this.socket,
       resourceType: this.type,
       resourceId: this.id,
       name: field,
+      transformations,
       passiveMode: this.passiveMode,
       publisherId: this.publisherId
     });
