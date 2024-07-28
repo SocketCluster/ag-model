@@ -135,7 +135,7 @@ AGModel.prototype.update = async function (field, newValue) {
     type: this.type,
     id: this.id,
     field: field,
-    value: newValue,
+    value: newValue
   };
   if (this.publisherId) {
     query.publisherId = this.publisherId;
