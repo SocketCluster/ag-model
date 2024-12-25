@@ -187,6 +187,7 @@ AGField.prototype.loadData = async function () {
     result = await this.socket.invoke('crud', query);
   } catch (error) {
     this.emit('error', {error: this._formatError(error)});
+    return;
   }
 
   if (this.isUpdating || this.isDeleting) {
