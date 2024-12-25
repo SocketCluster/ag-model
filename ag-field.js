@@ -150,7 +150,11 @@ AGField.AsyncStreamEmitter = AsyncStreamEmitter;
 AGField.prototype._formatError = function (error) {
   if (error) {
     if (error.message) {
-      return new Error(error.message);
+      let formattedError = new Error(error.message);
+      if (error.name) {
+        formattedError.name = error.name;
+      }
+      return formattedError;
     }
     return new Error(error);
   }
