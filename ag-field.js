@@ -14,7 +14,7 @@ function AGField(options) {
   this.isUpdating = false;
   this.isDeleting = false;
   this.passiveMode = options.passiveMode;
-  this.publisherId = options.publisherId;
+  this.publisherId = AGField.getFieldPublisherId(options.publisherId, this.name);
 
   this.resourceChannelName = `crud>${this.resourceType}/${this.resourceId}/${this.name}`;
   this._symbol = Symbol();
@@ -146,6 +146,11 @@ function AGField(options) {
 AGField.prototype = Object.create(AsyncStreamEmitter.prototype);
 
 AGField.AsyncStreamEmitter = AsyncStreamEmitter;
+
+AGField.getFieldPublisherId = function (publisherId, fieldName) {
+  if (!publisherId) return null;
+  return `${publisherId}/${fieldName}`;
+};
 
 AGField.prototype._formatError = function (error) {
   if (error) {

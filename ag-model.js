@@ -138,7 +138,7 @@ AGModel.prototype.update = async function (field, newValue) {
     value: newValue
   };
   if (this.publisherId) {
-    query.publisherId = this.publisherId;
+    query.publisherId = AGField.getFieldPublisherId(this.publisherId, field);
   }
   return this.socket.invoke('crud', query);
 };
@@ -150,7 +150,7 @@ AGModel.prototype.delete = async function (field) {
     id: this.id
   };
   if (this.publisherId) {
-    query.publisherId = this.publisherId;
+    query.publisherId = AGField.getFieldPublisherId(this.publisherId, field);
   }
   if (field != null) {
     if (this.agFields[field]) {
